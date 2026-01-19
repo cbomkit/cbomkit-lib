@@ -15,7 +15,7 @@
 
         <sonar.crypto.plugin.version>1.4.8</sonar.crypto.plugin.version>
         <sonar.plugin.api.version>13.3.0.3209</sonar.plugin.api.version>
-        <sonar.plugin.api.impl.version>25.8.0.112029</sonar.plugin.api.impl.version>
+        <sonar.plugin.api.impl.version>26.1.0.118079</sonar.plugin.api.impl.version>
 
         <cyclonedx-maven-plugin.version>2.9.1</cyclonedx-maven-plugin.version>
         <google-java-format.version>1.25.2</google-java-format.version>
