@@ -17,17 +17,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.pqca.scanning;
+package org.pqca.scanning.go;
 
+import com.ibm.engine.detection.Finding;
+import com.ibm.engine.language.go.GoScanContext;
 import com.ibm.mapper.model.INode;
+import com.ibm.plugin.rules.GoInventoryRule;
 import jakarta.annotation.Nonnull;
 import java.util.List;
 import java.util.function.Consumer;
-import org.pqca.errors.ClientDisconnected;
-import org.pqca.indexing.ProjectModule;
+import org.sonar.go.symbols.Symbol;
+import org.sonar.plugins.go.api.Tree;
+import org.sonar.plugins.go.api.checks.GoCheck;
 
-public interface IScannerService extends Consumer<List<INode>> {
+public class GoDetectionCollectionRule extends GoInventoryRule {
+    private final Consumer<List<INode>> handler;
 
-    @Nonnull
-    ScanResultDTO scan(@Nonnull List<ProjectModule> index) throws ClientDisconnected;
+    public GoDetectionCollectionRule(@Nonnull Consumer<List<INode>> findingConsumer) {
+        this.handler = findingConsumer;
+    }
+
+    @Override
+    public void update(@Nonnull Finding<GoCheck, Tree, Symbol, GoScanContext> finding) {
+        super.update(finding);
+        final List<INode> nodes = goTranslationProcess.initiate(finding.detectionStore());
+        handler.accept(nodes);
+    }
 }
