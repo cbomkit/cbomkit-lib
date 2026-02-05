@@ -1,6 +1,6 @@
 /*
  * CBOMkit-lib
- * Copyright (C) 2024 PQCA
+ * Copyright (C) 2025 PQCA
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -17,17 +17,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.pqca.scanning;
+package org.pqca.indexing;
 
-import com.ibm.mapper.model.INode;
-import jakarta.annotation.Nonnull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertThat;
+
+import java.io.File;
 import java.util.List;
-import java.util.function.Consumer;
+import org.junit.jupiter.api.Test;
 import org.pqca.errors.ClientDisconnected;
-import org.pqca.indexing.ProjectModule;
+import org.pqca.indexing.go.GoIndexService;
 
-public interface IScannerService extends Consumer<List<INode>> {
-
-    @Nonnull
-    ScanResultDTO scan(@Nonnull List<ProjectModule> index) throws ClientDisconnected;
+class GoIndexServiceTest {
+    @Test
+    void testDefaultExclusion() throws ClientDisconnected {
+        final GoIndexService goIndexService =
+                new GoIndexService(new File("src/test/testdata/go/simple"));
+        final List<ProjectModule> projectModules = goIndexService.index(null);
+        assertThat(projectModules).hasSize(1);
+        assertThat(projectModules.getFirst().inputFileList())
+                .extracting(Object::toString)
+                .containsExactlyInAnyOrder("go.mod", "module1/file.go");
+    }
 }
