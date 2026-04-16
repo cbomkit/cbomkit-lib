@@ -1,6 +1,6 @@
 /*
  * CBOMkit-lib
- * Copyright (C) 2024 PQCA
+ * Copyright (C) 2025 PQCA
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -17,17 +17,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.pqca.scanning;
+package org.pqca.indexing.go;
 
-import com.ibm.mapper.model.INode;
-import jakarta.annotation.Nonnull;
-import java.util.List;
-import java.util.function.Consumer;
-import org.pqca.errors.ClientDisconnected;
-import org.pqca.indexing.ProjectModule;
+import org.pqca.indexing.IBuildType;
 
-public interface IScannerService extends Consumer<List<INode>> {
-
-    @Nonnull
-    ScanResultDTO scan(@Nonnull List<ProjectModule> index) throws ClientDisconnected;
+public enum GoBuildType implements IBuildType {
+    GO,
+    MAVEN,
+    GRADLE
 }

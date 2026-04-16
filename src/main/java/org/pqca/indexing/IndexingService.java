@@ -46,9 +46,9 @@ public abstract class IndexingService {
     private static final Logger LOGGER = LoggerFactory.getLogger(IndexingService.class);
 
     @Nullable private final IProgressDispatcher progressDispatcher;
-    @Nonnull private final String languageIdentifier;
-    @Nonnull private final String languageFileExtension;
-    @Nonnull private File baseDirectory;
+    @Nonnull protected final String languageIdentifier;
+    @Nonnull protected final String languageFileExtension;
+    @Nonnull protected File baseDirectory;
     @Nullable private IBuildType mainBuildType;
 
     private List<Pattern> excludePatterns = new ArrayList<Pattern>();
@@ -178,12 +178,11 @@ public abstract class IndexingService {
                 }
                 continue;
             }
-            if (file.getName().endsWith(this.languageFileExtension)
-                    && !this.excludeFromIndexing(file)) {
+            if (this.isLanguageFile(file) && !this.excludeFromIndexing(file)) {
                 try {
                     final TestInputFileBuilder builder =
                             createTestFileBuilder(projectDirectory, file);
-                    builder.setLanguage(this.languageIdentifier);
+                    builder.setLanguage(getLanguage(file));
                     inputFiles.add(builder.build());
                 } catch (IOException iox) {
                     LOGGER.debug(iox.getLocalizedMessage());
@@ -232,6 +231,14 @@ public abstract class IndexingService {
     }
 
     public abstract boolean isModule(@Nonnull File directory);
+
+    protected boolean isLanguageFile(@Nonnull File file) {
+        return file.getName().endsWith(languageFileExtension);
+    }
+
+    protected String getLanguage(File file) {
+        return this.languageIdentifier;
+    }
 
     @Nullable public abstract IBuildType getMainBuildTypeFromModuleDirectory(@Nonnull File directory);
 }

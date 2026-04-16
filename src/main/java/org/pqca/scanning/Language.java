@@ -19,15 +19,8 @@
  */
 package org.pqca.scanning;
 
-import com.ibm.mapper.model.INode;
-import jakarta.annotation.Nonnull;
-import java.util.List;
-import java.util.function.Consumer;
-import org.pqca.errors.ClientDisconnected;
-import org.pqca.indexing.ProjectModule;
-
-public interface IScannerService extends Consumer<List<INode>> {
-
-    @Nonnull
-    ScanResultDTO scan(@Nonnull List<ProjectModule> index) throws ClientDisconnected;
+public enum Language {
+    JAVA,
+    PYTHON,
+    GO
 }
