@@ -134,7 +134,6 @@ public final class GoScannerService extends ScannerService {
             return this.checks;
         }
 
-        @SuppressWarnings("null")
         public RuleKey ruleKey(GoCheck check) {
             return RuleKey.of("sonar-cryptography", "go-rule");
         }
