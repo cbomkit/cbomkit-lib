@@ -32,11 +32,21 @@ class GoIndexServiceTest {
     @Test
     void testDefaultExclusion() throws ClientDisconnected {
         final GoIndexService goIndexService =
-                new GoIndexService(new File("src/test/testdata/go/simple"));
+                new GoIndexService(new File("src/test/testdata/go/gocrypto"));
         final List<ProjectModule> projectModules = goIndexService.index(null);
         assertThat(projectModules).hasSize(1);
-        assertThat(projectModules.getFirst().inputFileList())
-                .extracting(Object::toString)
-                .containsExactlyInAnyOrder("go.mod", "module1/file.go");
+        assertThat(projectModules.getFirst().identifier()).isEqualTo("");
+        assertThat(projectModules.getFirst().inputFileList()).hasSize(36);
+    }
+
+    @Test
+    void testCustomExclusion() throws ClientDisconnected {
+        final GoIndexService goIndexService =
+                new GoIndexService(new File("src/test/testdata/go/gocrypto"));
+        goIndexService.setExcludePatterns(List.of("RSA"));
+        final List<ProjectModule> projectModules = goIndexService.index(null);
+        assertThat(projectModules).hasSize(1);
+        assertThat(projectModules.getFirst().identifier()).isEqualTo("");
+        assertThat(projectModules.getFirst().inputFileList()).hasSize(31);
     }
 }

@@ -26,7 +26,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
+import org.apache.commons.io.FileUtils;
 import org.pqca.errors.ClientDisconnected;
 import org.pqca.indexing.ProjectModule;
 import org.pqca.progress.IProgressDispatcher;
@@ -46,8 +46,6 @@ import org.sonar.plugins.go.api.checks.GoCheck;
 
 public final class GoScannerService extends ScannerService {
 
-    private final GoConverter goConverter;
-
     public GoScannerService(@Nonnull File projectDirectory) {
         this(null, projectDirectory);
     }
@@ -55,27 +53,6 @@ public final class GoScannerService extends ScannerService {
     public GoScannerService(
             @Nullable IProgressDispatcher progressDispatcher, @Nonnull File projectDirectory) {
         super(progressDispatcher, projectDirectory);
-
-        try {
-            DefaultTempFolder tempFolder = new DefaultTempFolder(createDirectory());
-            goConverter = new GoConverter(tempFolder.newDir());
-        } catch (IOException ioe) {
-            throw new IllegalStateException(ioe);
-        }
-    }
-
-    @Nonnull
-    private File createDirectory() throws IOException {
-        // create directory
-        final String folderId = UUID.randomUUID().toString().replace("-", "");
-        final File tempDir = new File(this.projectDirectory + File.separator + folderId);
-        if (tempDir.exists()) {
-            throw new IOException("Temp dir already exists " + tempDir.getPath());
-        }
-        if (!tempDir.mkdirs()) {
-            throw new IOException("Could not create temp dir" + tempDir.getPath());
-        }
-        return tempDir;
     }
 
     @Override
@@ -88,31 +65,45 @@ public final class GoScannerService extends ScannerService {
         int numberOfScannedLines = 0;
         int numberOfScannedFiles = 0;
 
-        GoCheck visitor = new GoDetectionCollectionRule(this);
-        GoChecks checks = new GoRuleChecks(visitor);
-        final SensorContextTester sensorContext = SensorContextTester.create(projectDirectory);
-        // Go scanner (CryptoGoSensor) reads files from context
-        index.forEach(project -> project.inputFileList().forEach(sensorContext.fileSystem()::add));
+        File goTempFolder = new DefaultTempFolder(this.projectDirectory).newDir();
 
-        for (ProjectModule project : index) {
-            numberOfScannedFiles += project.inputFileList().size();
-            numberOfScannedLines +=
-                    project.inputFileList().stream().mapToInt(InputFile::lines).sum();
+        try {
+            GoConverter goConverter = new GoConverter(goTempFolder);
+            GoCheck visitor = new GoDetectionCollectionRule(this);
+            GoChecks checks = new GoRuleChecks(visitor);
+            final SensorContextTester sensorContext = SensorContextTester.create(projectDirectory);
 
-            final String projectStr =
-                    project.identifier() + " (" + counter + "/" + index.size() + ")";
-            if (this.progressDispatcher != null) {
-                this.progressDispatcher.send(
-                        new ProgressMessage(
-                                ProgressMessageType.LABEL, "Scanning go project " + projectStr));
+            // Go scanner (CryptoGoSensor) reads files from context
+            index.forEach(
+                    project -> project.inputFileList().forEach(sensorContext.fileSystem()::add));
+
+            for (ProjectModule project : index) {
+                numberOfScannedFiles += project.inputFileList().size();
+                numberOfScannedLines +=
+                        project.inputFileList().stream().mapToInt(InputFile::lines).sum();
+
+                final String projectStr =
+                        project.identifier() + " (" + counter + "/" + index.size() + ")";
+                if (this.progressDispatcher != null) {
+                    this.progressDispatcher.send(
+                            new ProgressMessage(
+                                    ProgressMessageType.LABEL,
+                                    "Scanning go project " + projectStr));
+                }
+                LOGGER.info("Scanning go project {}", projectStr);
+
+                CryptoGoSensor.execute((SensorContext) sensorContext, goConverter, checks);
+
+                counter += 1;
             }
-            LOGGER.info("Scanning go project {}", projectStr);
-
-            CryptoGoSensor.execute((SensorContext) sensorContext, goConverter, checks);
-
-            counter += 1;
+            LOGGER.info("Scanned {} go projects", index.size());
+        } finally {
+            try {
+                FileUtils.deleteDirectory(goTempFolder);
+            } catch (IOException e) {
+                LOGGER.error("Failed to delete temp dir {}", goTempFolder);
+            }
         }
-        LOGGER.info("Scanned {} go projects", index.size());
 
         return new ScanResultDTO(
                 scanTimeStart,
@@ -134,7 +125,6 @@ public final class GoScannerService extends ScannerService {
             return this.checks;
         }
 
-        @SuppressWarnings("null")
         public RuleKey ruleKey(GoCheck check) {
             return RuleKey.of("sonar-cryptography", "go-rule");
         }
