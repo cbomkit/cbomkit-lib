@@ -47,12 +47,12 @@ class GoScannerServiceTest {
 
         // check - verify cryptographic assets are detected
         AssertableCBOM assertableCBOM = new AssertableCBOM(scanResult.cbom());
-        assertThat(scanResult.cbom().cycloneDXbom().getComponents()).hasSize(27);
+        assertThat(scanResult.cbom().cycloneDXbom().getComponents()).hasSize(28);
         assertableCBOM.hasNumberOfDetections(69);
 
         assertThat(
                         assertableCBOM.hasDetectionWithNameAt(
-                                "SHA256",
+                                "SHA-256",
                                 "src/test/testdata/go/gocrypto/GoCryptoSHA256TestFile.go",
                                 10))
                 .isTrue();
@@ -73,14 +73,14 @@ class GoScannerServiceTest {
 
         assertThat(
                         assertableCBOM.hasDetectionWithNameAt(
-                                "HMAC-SHA256",
+                                "HMAC-SHA-256",
                                 "src/test/testdata/go/gocrypto/GoCryptoHMACTestFile.go",
                                 11))
                 .isTrue();
 
         assertThat(
                         assertableCBOM.hasDetectionWithNameAt(
-                                "PBKDF2",
+                                "PBKDF2-SHA-256",
                                 "src/test/testdata/go/gocrypto/GoCryptoPBKDF2TestFile.go",
                                 15))
                 .isTrue();
