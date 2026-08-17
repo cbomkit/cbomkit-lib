@@ -52,19 +52,19 @@ class PythonScannerServiceTest {
 
         assertThat(
                         assertableCBOM.hasDetectionWithNameAt(
-                                "SHA256", "src/test/testdata/python/pyca/generate_key.py", 4))
+                                "SHA-256", "src/test/testdata/python/pyca/generate_key.py", 4))
                 .isTrue();
 
         assertThat(
                         assertableCBOM.hasDetectionWithNameAt(
-                                "AES128-CBC-PKCS7",
+                                "AES-128-CBC-PKCS7",
                                 "src/test/testdata/python/pyca/generate_key.py",
                                 4))
                 .isTrue();
 
         assertThat(
                         assertableCBOM.hasDetectionWithNameAt(
-                                "HMAC-SHA256", "src/test/testdata/python/pyca/generate_key.py", 4))
+                                "HMAC-SHA-256", "src/test/testdata/python/pyca/generate_key.py", 4))
                 .isTrue();
 
         assertThat(
