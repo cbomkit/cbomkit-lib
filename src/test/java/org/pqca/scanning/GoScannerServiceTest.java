@@ -88,7 +88,7 @@ class GoScannerServiceTest {
 
         assertThat(
                         assertableCBOM.hasDetectionWithNameAt(
-                                "PBKDF2",
+                                "PBKDF2-SHA-256",
                                 "src/test/testdata/go/gocrypto/GoCryptoPBKDF2TestFile.go",
                                 15))
                 .isTrue();
