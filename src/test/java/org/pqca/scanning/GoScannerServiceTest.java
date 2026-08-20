@@ -22,7 +22,13 @@ package org.pqca.scanning;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.pqca.errors.ClientDisconnected;
 import org.pqca.indexing.ProjectModule;
@@ -33,9 +39,11 @@ import org.pqca.utils.AssertableCBOM;
 class GoScannerServiceTest {
 
     @Test
-    void test() throws ClientDisconnected {
+    void test() throws ClientDisconnected, IOException {
         // indexing
         final File projectDirectory = new File("src/test/testdata/go/gocrypto");
+        final Set<String> projectDirectoryEntriesBeforeScan =
+                listRelativePaths(projectDirectory.toPath());
         final GoIndexService goIndexService = new GoIndexService(projectDirectory);
         final List<ProjectModule> goModules = goIndexService.index(null);
         assertThat(goModules).hasSize(1);
@@ -84,5 +92,16 @@ class GoScannerServiceTest {
                                 "src/test/testdata/go/gocrypto/GoCryptoPBKDF2TestFile.go",
                                 15))
                 .isTrue();
+
+        assertThat(listRelativePaths(projectDirectory.toPath()))
+                .isEqualTo(projectDirectoryEntriesBeforeScan);
+    }
+
+    private static Set<String> listRelativePaths(Path projectDirectory) throws IOException {
+        try (Stream<Path> paths = Files.walk(projectDirectory)) {
+            return paths.map(projectDirectory::relativize)
+                    .map(Path::toString)
+                    .collect(Collectors.toSet());
+        }
     }
 }
