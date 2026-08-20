@@ -17,7 +17,7 @@
         <sonar.plugin.api.version>13.11.0.4459</sonar.plugin.api.version>
         <sonar.plugin.api.impl.version>25.8.0.112029</sonar.plugin.api.impl.version>
 
-        <cyclonedx-maven-plugin.version>2.9.1</cyclonedx-maven-plugin.version>
+        <cyclonedx-maven-plugin.version>2.9.3</cyclonedx-maven-plugin.version>
         <google-java-format.version>1.25.2</google-java-format.version>
     </properties>
 
