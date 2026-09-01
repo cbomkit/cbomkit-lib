@@ -24,57 +24,62 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.File;
 import java.util.List;
 import org.junit.jupiter.api.Test;
-import org.pqca.errors.CBOMSerializationFailed;
 import org.pqca.errors.ClientDisconnected;
 import org.pqca.indexing.ProjectModule;
-import org.pqca.indexing.go.GoIndexService;
-import org.pqca.scanning.go.GoScannerService;
+import org.pqca.indexing.csharp.CSharpIndexService;
+import org.pqca.scanning.csharp.CSharpScannerService;
 import org.pqca.utils.AssertableCBOM;
 
-class GoScannerServiceTest {
+class CSharpScannerServiceTest {
 
-    private static final String GO_TEST_BASE_DIR = "src/test/testdata/go/gocrypto";
+    private static final String CSHARP_TEST_BASE_DIR = "src/test/testdata/csharp/dotnet";
 
     @Test
-    void test() throws ClientDisconnected, CBOMSerializationFailed {
+    void test() throws ClientDisconnected {
         // indexing
-        final File projectDirectory = new File(GO_TEST_BASE_DIR);
-        final GoIndexService goIndexService = new GoIndexService(projectDirectory);
-        final List<ProjectModule> goModules = goIndexService.index(null);
-        assertThat(goModules).hasSize(1);
-        final ProjectModule projectModule = goModules.getFirst();
-        assertThat(projectModule.inputFileList()).isNotEmpty();
+        final File projectDirectory = new File(CSHARP_TEST_BASE_DIR);
+        final CSharpIndexService cSharpIndexService = new CSharpIndexService(projectDirectory);
+        final List<ProjectModule> cSharpModules = cSharpIndexService.index(null);
+        assertThat(cSharpModules).hasSize(1);
+        final ProjectModule projectModule = cSharpModules.getFirst();
+        assertThat(projectModule.inputFileList()).hasSize(12);
         // scanning
-        final GoScannerService goScannerService = new GoScannerService(projectDirectory);
-        ScanResultDTO scanResult = goScannerService.scan(goModules);
-        // check - verify cryptographic assets are detected
+        final CSharpScannerService cSharpScannerService =
+                new CSharpScannerService(projectDirectory);
+        ScanResultDTO scanResult = cSharpScannerService.scan(cSharpModules);
+
+        // check - 21 unique cryptographic assets with 27 total occurrences
         AssertableCBOM assertableCBOM = new AssertableCBOM(scanResult.cbom());
-        assertThat(scanResult.cbom().cycloneDXbom().getComponents()).hasSize(28);
-        assertableCBOM.hasNumberOfDetections(69);
+        assertThat(scanResult.cbom().cycloneDXbom().getComponents()).hasSize(21);
+        assertableCBOM.hasNumberOfDetections(27);
 
         assertThat(
                         assertableCBOM.hasDetectionWithNameAt(
-                                "SHA-256", GO_TEST_BASE_DIR + "/GoCryptoSHA256TestFile.go", 10))
+                                "SHA-256", CSHARP_TEST_BASE_DIR + "/DotNetSHATestFile.cs", 4))
                 .isTrue();
 
         assertThat(
                         assertableCBOM.hasDetectionWithNameAt(
-                                "AES-GCM", GO_TEST_BASE_DIR + "/GoCryptoAESTestFile.go", 18))
+                                "AES-256-CBC-PKCS7",
+                                CSHARP_TEST_BASE_DIR + "/DotNetAESPropertyTestFile.cs",
+                                7))
                 .isTrue();
 
         assertThat(
                         assertableCBOM.hasDetectionWithNameAt(
-                                "RSA-2048", GO_TEST_BASE_DIR + "/GoCryptoRSATestFile.go", 10))
+                                "HMAC-SHA-256", CSHARP_TEST_BASE_DIR + "/DotNetHMACTestFile.cs", 4))
                 .isTrue();
 
         assertThat(
                         assertableCBOM.hasDetectionWithNameAt(
-                                "HMAC-SHA-256", GO_TEST_BASE_DIR + "/GoCryptoHMACTestFile.go", 11))
+                                "RSA", CSHARP_TEST_BASE_DIR + "/DotNetRSATestFile.cs", 3))
                 .isTrue();
 
         assertThat(
                         assertableCBOM.hasDetectionWithNameAt(
-                                "PBKDF2", GO_TEST_BASE_DIR + "/GoCryptoPBKDF2TestFile.go", 15))
+                                "PBKDF2",
+                                CSHARP_TEST_BASE_DIR + "/DotNetRfc2898DeriveBytesTestFile.cs",
+                                4))
                 .isTrue();
     }
 }

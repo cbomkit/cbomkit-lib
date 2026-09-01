@@ -32,10 +32,12 @@ import org.pqca.utils.AssertableCBOM;
 
 class PythonScannerServiceTest {
 
+    private static final String PY_TEST_BASE_DIR = "src/test/testdata/python/pyca";
+
     @Test
     void test() throws ClientDisconnected {
         // indexing
-        final File projectDirectory = new File("src/test/testdata/python/pyca");
+        final File projectDirectory = new File(PY_TEST_BASE_DIR);
         final PythonIndexService pythonIndexService = new PythonIndexService(projectDirectory);
         final List<ProjectModule> projectModules = pythonIndexService.index(null);
         assertThat(projectModules).hasSize(1);
@@ -52,29 +54,27 @@ class PythonScannerServiceTest {
 
         assertThat(
                         assertableCBOM.hasDetectionWithNameAt(
-                                "SHA-256", "src/test/testdata/python/pyca/generate_key.py", 4))
+                                "SHA-256", PY_TEST_BASE_DIR + "/generate_key.py", 4))
                 .isTrue();
 
         assertThat(
                         assertableCBOM.hasDetectionWithNameAt(
-                                "AES-128-CBC-PKCS7",
-                                "src/test/testdata/python/pyca/generate_key.py",
-                                4))
+                                "AES-128-CBC-PKCS7", PY_TEST_BASE_DIR + "/generate_key.py", 4))
                 .isTrue();
 
         assertThat(
                         assertableCBOM.hasDetectionWithNameAt(
-                                "HMAC-SHA-256", "src/test/testdata/python/pyca/generate_key.py", 4))
+                                "HMAC-SHA-256", PY_TEST_BASE_DIR + "/generate_key.py", 4))
                 .isTrue();
 
         assertThat(
                         assertableCBOM.hasDetectionWithNameAt(
-                                "Fernet", "src/test/testdata/python/pyca/generate_key.py", 4))
+                                "Fernet", PY_TEST_BASE_DIR + "/generate_key.py", 4))
                 .isTrue();
 
         assertThat(
                         assertableCBOM.hasDetectionWithNameAt(
-                                "secret-key", "src/test/testdata/python/pyca/generate_key.py", 4))
+                                "secret-key", PY_TEST_BASE_DIR + "/generate_key.py", 4))
                 .isTrue();
     }
 }
