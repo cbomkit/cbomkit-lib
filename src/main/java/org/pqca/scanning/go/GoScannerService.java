@@ -24,6 +24,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
@@ -38,7 +39,6 @@ import org.pqca.scanning.ScannerService;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
-import org.sonar.api.impl.utils.DefaultTempFolder;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.go.converter.GoConverter;
 import org.sonar.go.plugin.GoChecks;
@@ -65,10 +65,8 @@ public final class GoScannerService extends ScannerService {
         int numberOfScannedLines = 0;
         int numberOfScannedFiles = 0;
 
-        File goTempFolder = new DefaultTempFolder(this.projectDirectory).newDir();
-
-        try {
-            GoConverter goConverter = new GoConverter(goTempFolder);
+        try (GoTempFolder goTempFolder = GoTempFolder.create()) {
+            GoConverter goConverter = new GoConverter(goTempFolder.file());
             GoCheck visitor = new GoDetectionCollectionRule(this);
             GoChecks checks = new GoRuleChecks(visitor);
             final SensorContextTester sensorContext = SensorContextTester.create(projectDirectory);
@@ -97,12 +95,8 @@ public final class GoScannerService extends ScannerService {
                 counter += 1;
             }
             LOGGER.info("Scanned {} go projects", index.size());
-        } finally {
-            try {
-                FileUtils.deleteDirectory(goTempFolder);
-            } catch (IOException e) {
-                LOGGER.error("Failed to delete temp dir {}", goTempFolder);
-            }
+        } catch (IOException e) {
+            LOGGER.error("Failed to create temp dir for go scanner", e);
         }
 
         return new ScanResultDTO(
@@ -111,6 +105,31 @@ public final class GoScannerService extends ScannerService {
                 numberOfScannedLines,
                 numberOfScannedFiles,
                 this.getBOM().map(CBOM::new).orElse(null));
+    }
+
+    private static final class GoTempFolder implements AutoCloseable {
+        private final File directory;
+
+        private GoTempFolder(File directory) {
+            this.directory = directory;
+        }
+
+        private static GoTempFolder create() throws IOException {
+            return new GoTempFolder(Files.createTempDirectory("cbomkit-go-").toFile());
+        }
+
+        private File file() {
+            return this.directory;
+        }
+
+        @Override
+        public void close() {
+            try {
+                FileUtils.deleteDirectory(this.directory);
+            } catch (IOException e) {
+                LOGGER.error("Failed to delete temp dir {}", this.directory, e);
+            }
+        }
     }
 
     private class GoRuleChecks extends GoChecks {
