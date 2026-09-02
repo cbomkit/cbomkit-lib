@@ -22,5 +22,6 @@ package org.pqca.scanning;
 public enum Language {
     JAVA,
     PYTHON,
-    GO
+    GO,
+    CSHARP
 }

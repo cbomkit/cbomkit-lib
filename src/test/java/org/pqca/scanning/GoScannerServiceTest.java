@@ -29,9 +29,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.junit.jupiter.api.Test;
-
 import org.pqca.errors.ClientDisconnected;
 import org.pqca.indexing.ProjectModule;
 import org.pqca.indexing.go.GoIndexService;
@@ -87,7 +85,7 @@ class GoScannerServiceTest {
                         assertableCBOM.hasDetectionWithNameAt(
                                 "PBKDF2", GO_TEST_BASE_DIR + "/GoCryptoPBKDF2TestFile.go", 15))
                 .isTrue();
-        
+
         assertThat(listRelativePaths(projectDirectory.toPath()))
                 .isEqualTo(projectDirectoryEntriesBeforeScan);
     }
