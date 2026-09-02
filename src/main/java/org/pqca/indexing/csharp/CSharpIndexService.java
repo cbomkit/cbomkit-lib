@@ -17,7 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.pqca.indexing.java;
+package org.pqca.indexing.csharp;
 
 import jakarta.annotation.Nonnull;
 import java.io.File;
@@ -27,26 +27,21 @@ import org.pqca.indexing.IBuildType;
 import org.pqca.indexing.IndexingService;
 import org.pqca.progress.IProgressDispatcher;
 
-public final class JavaIndexService extends IndexingService {
+public final class CSharpIndexService extends IndexingService {
 
-    public JavaIndexService(@Nonnull File baseDirectory) {
+    public CSharpIndexService(@Nonnull File baseDirectory) {
         this(null, baseDirectory);
     }
 
-    public JavaIndexService(
+    public CSharpIndexService(
             @Nullable IProgressDispatcher progressDispatcher, @Nonnull File baseDirectory) {
-        super(progressDispatcher, baseDirectory, "java", ".java");
+        super(progressDispatcher, baseDirectory, "cs", ".cs");
         this.setExcludePatterns(null);
     }
 
     public void setExcludePatterns(@Nullable List<String> patterns) {
         if (patterns == null) {
-            super.setExcludePatterns(
-                    List.of(
-                            "src/test/",
-                            "/package-info\\.java$",
-                            "/module-info\\.java$",
-                            "Test\\.java$"));
+            super.setExcludePatterns(List.of("test/", "tests/", "\\.Tests/", "Tests\\.cs$"));
         } else {
             super.setExcludePatterns(patterns);
         }
@@ -57,14 +52,9 @@ public final class JavaIndexService extends IndexingService {
         if (!directory.isDirectory()) {
             return false;
         }
-        final File srcFolder = new File(directory, "src");
-        for (String buildFileName : List.of("pom.xml", "build.gradle", "build.gradle.kts")) {
-            final File file = new File(directory, buildFileName);
-            if (file.exists() && file.isFile() && srcFolder.exists()) {
-                return true;
-            }
-        }
-        return false;
+
+        final File file = new File(directory, directory.getName() + ".csproj");
+        return file.exists() && file.isFile();
     }
 
     @Override
@@ -72,17 +62,10 @@ public final class JavaIndexService extends IndexingService {
         if (!directory.isDirectory()) {
             return null;
         }
-        // maven
-        final File pomFile = new File(directory, "pom.xml");
-        if (pomFile.exists() && pomFile.isFile()) {
-            return JavaBuildType.MAVEN;
-        }
-        // gradle
-        for (String gradleFileName : List.of("build.gradle", "build.gradle.kts")) {
-            final File gradleFile = new File(directory, gradleFileName);
-            if (gradleFile.exists() && gradleFile.isFile()) {
-                return JavaBuildType.GRADLE;
-            }
+        // csproj
+        final File csProjFile = new File(directory, directory.getName() + ".csproj");
+        if (csProjFile.exists() && csProjFile.isFile()) {
+            return CSharpBuildType.CSPROJ;
         }
         return null;
     }

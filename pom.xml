@@ -13,7 +13,7 @@
         <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <sonar.crypto.plugin.version>1.6.1</sonar.crypto.plugin.version>
+        <sonar.crypto.plugin.version>1.7.0</sonar.crypto.plugin.version>
         <sonar.plugin.api.version>13.11.0.4459</sonar.plugin.api.version>
         <sonar.plugin.api.impl.version>25.8.0.112029</sonar.plugin.api.impl.version>
 
@@ -70,6 +70,21 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

@@ -26,55 +26,60 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.pqca.errors.ClientDisconnected;
 import org.pqca.indexing.ProjectModule;
-import org.pqca.indexing.python.PythonIndexService;
-import org.pqca.scanning.python.PythonScannerService;
+import org.pqca.indexing.csharp.CSharpIndexService;
+import org.pqca.scanning.csharp.CSharpScannerService;
 import org.pqca.utils.AssertableCBOM;
 
-class PythonScannerServiceTest {
+class CSharpScannerServiceTest {
 
-    private static final String PY_TEST_BASE_DIR = "src/test/testdata/python/pyca";
+    private static final String CSHARP_TEST_BASE_DIR = "src/test/testdata/csharp/dotnet";
 
     @Test
     void test() throws ClientDisconnected {
         // indexing
-        final File projectDirectory = new File(PY_TEST_BASE_DIR);
-        final PythonIndexService pythonIndexService = new PythonIndexService(projectDirectory);
-        final List<ProjectModule> projectModules = pythonIndexService.index(null);
-        assertThat(projectModules).hasSize(1);
-        final ProjectModule projectModule = projectModules.getFirst();
-        assertThat(projectModule.inputFileList()).hasSize(1);
+        final File projectDirectory = new File(CSHARP_TEST_BASE_DIR);
+        final CSharpIndexService cSharpIndexService = new CSharpIndexService(projectDirectory);
+        final List<ProjectModule> cSharpModules = cSharpIndexService.index(null);
+        assertThat(cSharpModules).hasSize(1);
+        final ProjectModule projectModule = cSharpModules.getFirst();
+        assertThat(projectModule.inputFileList()).hasSize(12);
         // scanning
-        final PythonScannerService pythonScannerService =
-                new PythonScannerService(projectDirectory);
-        ScanResultDTO scanResult = pythonScannerService.scan(projectModules);
+        final CSharpScannerService cSharpScannerService =
+                new CSharpScannerService(projectDirectory);
+        ScanResultDTO scanResult = cSharpScannerService.scan(cSharpModules);
 
-        // check
+        // check - 21 unique cryptographic assets with 27 total occurrences
         AssertableCBOM assertableCBOM = new AssertableCBOM(scanResult.cbom());
-        assertableCBOM.hasNumberOfDetections(5);
+        assertThat(scanResult.cbom().cycloneDXbom().getComponents()).hasSize(21);
+        assertableCBOM.hasNumberOfDetections(27);
 
         assertThat(
                         assertableCBOM.hasDetectionWithNameAt(
-                                "SHA-256", PY_TEST_BASE_DIR + "/generate_key.py", 4))
+                                "SHA-256", CSHARP_TEST_BASE_DIR + "/DotNetSHATestFile.cs", 4))
                 .isTrue();
 
         assertThat(
                         assertableCBOM.hasDetectionWithNameAt(
-                                "AES-128-CBC-PKCS7", PY_TEST_BASE_DIR + "/generate_key.py", 4))
+                                "AES-256-CBC-PKCS7",
+                                CSHARP_TEST_BASE_DIR + "/DotNetAESPropertyTestFile.cs",
+                                7))
                 .isTrue();
 
         assertThat(
                         assertableCBOM.hasDetectionWithNameAt(
-                                "HMAC-SHA-256", PY_TEST_BASE_DIR + "/generate_key.py", 4))
+                                "HMAC-SHA-256", CSHARP_TEST_BASE_DIR + "/DotNetHMACTestFile.cs", 4))
                 .isTrue();
 
         assertThat(
                         assertableCBOM.hasDetectionWithNameAt(
-                                "Fernet", PY_TEST_BASE_DIR + "/generate_key.py", 4))
+                                "RSA", CSHARP_TEST_BASE_DIR + "/DotNetRSATestFile.cs", 3))
                 .isTrue();
 
         assertThat(
                         assertableCBOM.hasDetectionWithNameAt(
-                                "secret-key", PY_TEST_BASE_DIR + "/generate_key.py", 4))
+                                "PBKDF2",
+                                CSHARP_TEST_BASE_DIR + "/DotNetRfc2898DeriveBytesTestFile.cs",
+                                4))
                 .isTrue();
     }
 }

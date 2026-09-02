@@ -38,10 +38,12 @@ import org.pqca.utils.AssertableCBOM;
 
 class GoScannerServiceTest {
 
+    private static final String GO_TEST_BASE_DIR = "src/test/testdata/go/gocrypto";
+
     @Test
     void test() throws ClientDisconnected, IOException {
         // indexing
-        final File projectDirectory = new File("src/test/testdata/go/gocrypto");
+        final File projectDirectory = new File(GO_TEST_BASE_DIR);
         final Set<String> projectDirectoryEntriesBeforeScan =
                 listRelativePaths(projectDirectory.toPath());
         final GoIndexService goIndexService = new GoIndexService(projectDirectory);
@@ -49,6 +51,7 @@ class GoScannerServiceTest {
         assertThat(goModules).hasSize(1);
         final ProjectModule projectModule = goModules.getFirst();
         assertThat(projectModule.inputFileList()).isNotEmpty();
+
         // scanning
         final GoScannerService goScannerService = new GoScannerService(projectDirectory);
         ScanResultDTO scanResult = goScannerService.scan(goModules);
@@ -60,37 +63,27 @@ class GoScannerServiceTest {
 
         assertThat(
                         assertableCBOM.hasDetectionWithNameAt(
-                                "SHA-256",
-                                "src/test/testdata/go/gocrypto/GoCryptoSHA256TestFile.go",
-                                10))
+                                "SHA-256", GO_TEST_BASE_DIR + "/GoCryptoSHA256TestFile.go", 10))
                 .isTrue();
 
         assertThat(
                         assertableCBOM.hasDetectionWithNameAt(
-                                "AES-GCM",
-                                "src/test/testdata/go/gocrypto/GoCryptoAESTestFile.go",
-                                18))
+                                "AES-GCM", GO_TEST_BASE_DIR + "/GoCryptoAESTestFile.go", 18))
                 .isTrue();
 
         assertThat(
                         assertableCBOM.hasDetectionWithNameAt(
-                                "RSA-2048",
-                                "src/test/testdata/go/gocrypto/GoCryptoRSATestFile.go",
-                                10))
+                                "RSA-2048", GO_TEST_BASE_DIR + "/GoCryptoRSATestFile.go", 10))
                 .isTrue();
 
         assertThat(
                         assertableCBOM.hasDetectionWithNameAt(
-                                "HMAC-SHA-256",
-                                "src/test/testdata/go/gocrypto/GoCryptoHMACTestFile.go",
-                                11))
+                                "HMAC-SHA-256", GO_TEST_BASE_DIR + "/GoCryptoHMACTestFile.go", 11))
                 .isTrue();
 
         assertThat(
                         assertableCBOM.hasDetectionWithNameAt(
-                                "PBKDF2-SHA-256",
-                                "src/test/testdata/go/gocrypto/GoCryptoPBKDF2TestFile.go",
-                                15))
+                                "PBKDF2", GO_TEST_BASE_DIR + "/GoCryptoPBKDF2TestFile.go", 15))
                 .isTrue();
 
         assertThat(listRelativePaths(projectDirectory.toPath()))

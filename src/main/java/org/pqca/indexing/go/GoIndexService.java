@@ -41,7 +41,7 @@ public final class GoIndexService extends IndexingService {
 
     public void setExcludePatterns(@Nullable List<String> patterns) {
         if (patterns == null) {
-            super.setExcludePatterns(List.of("test/", "_test.go$"));
+            super.setExcludePatterns(List.of("test/", "_test\\.go$"));
         } else {
             super.setExcludePatterns(patterns);
         }
