@@ -41,7 +41,7 @@ public final class PythonIndexService extends IndexingService {
 
     public void setExcludePatterns(@Nullable List<String> patterns) {
         if (patterns == null) {
-            super.setExcludePatterns(List.of("src/test/", "tests/"));
+            super.setExcludePatterns(List.of("src/test/", "tests/", "/test_*\\.py$", "test\\.py$"));
         } else {
             super.setExcludePatterns(patterns);
         }

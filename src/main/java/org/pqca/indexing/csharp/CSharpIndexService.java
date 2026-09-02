@@ -41,7 +41,7 @@ public final class CSharpIndexService extends IndexingService {
 
     public void setExcludePatterns(@Nullable List<String> patterns) {
         if (patterns == null) {
-            super.setExcludePatterns(List.of("tests/", "Tests$"));
+            super.setExcludePatterns(List.of("test/", "tests/", "\\.Tests/", "Tests\\.cs$"));
         } else {
             super.setExcludePatterns(patterns);
         }

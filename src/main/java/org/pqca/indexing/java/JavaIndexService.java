@@ -42,7 +42,11 @@ public final class JavaIndexService extends IndexingService {
     public void setExcludePatterns(@Nullable List<String> patterns) {
         if (patterns == null) {
             super.setExcludePatterns(
-                    List.of("src/test/", "/package-info.java$", "/module-info.java$"));
+                    List.of(
+                            "src/test/",
+                            "/package-info\\.java$",
+                            "/module-info\\.java$",
+                            "Test\\.java$"));
         } else {
             super.setExcludePatterns(patterns);
         }
